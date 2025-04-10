@@ -21,10 +21,7 @@ const processRequest = (req, res) => {
                     res.setHeader('Content-Type', 'application/json; charset=utf-8');
                     res.end(JSON.stringify(cha1));
                     break;
-                case '/img':
-                    res.setHeader('Content-Type', 'image/png');
-                    res.end('<h1>Imagen</h1>');
-                    break;
+                
                 default:
                     res.statusCode = 404;
                     res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -32,7 +29,16 @@ const processRequest = (req, res) => {
             }
             break;
         
-        case 'POST':
+        case 'POST': 
+            switch(url) {
+                case '/character/':
+                    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+                    let body = '';
+                }
+                default:
+                    res.statusCode = 404;
+                    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+                    res.end('<h1> 404 not found </h1>');
 
             
     }

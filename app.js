@@ -1,44 +1,49 @@
 import http from 'node:http';
-import aviablePort from './src/aviablePort.js';
-import fs from 'node:fs';
+import { readFileSync } from 'node:fs';
 
-const lookingPort = process.env.PORT ?? 3000
+const PORT = process.env.PORT ?? 3000;
+
+// imports JSONs
+const cha1 = JSON.parse(readFileSync('./src/jsons/characters/1.JSON', 'utf-8'));
 
 const processRequest = (req, res) => {
-    if(req.url === '/'){
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.end('<h1> Bienvenido a mi página de inicio</h1> <a href="/contacto">Contacto</a>');
-    
-    } else if (req.url === '/contacto'){
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.end('<h1>contacto</h1> <a href="/">Inicio</a>');
-    }
-    else if(req.url === '/img'){
-        fs.readFile('./src/tts.png', (err, data) => {
-            if (err) {
-                res.statusCode = 500;
-                res.setHeader('Content-Type', 'text/html; charset=utf-8');
-                res.end('<h1> 500 something happend</h1>');
-                return;
-            } else {
-                res.statusCode = 200;
-                res.setHeader('Content-Type', 'image/png');
-                res.end(data);
+    const {method, url} = req;
+
+    switch (method) {
+        case 'GET':
+
+            switch(url){
+                case '/':
+                    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+                    res.end('<h1> Bienvenido </h1> <a href="/character/1">personaje 1</a>');
+                    break;
+                case '/character/1':
+                    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+                    res.end(JSON.stringify(cha1));
+                    break;
+                case '/img':
+                    res.setHeader('Content-Type', 'image/png');
+                    res.end('<h1>Imagen</h1>');
+                    break;
+                default:
+                    res.statusCode = 404;
+                    res.setHeader('Content-Type', 'text/html; charset=utf-8');
+                    res.end('<h1> 404 </h1>');
             }
-        })
-        res.setHeader('Content-Type', 'image/png');
+            break;
         
-    } else {
-        res.statusCode = 404;
-        res.setHeader('Content-Type', 'text/html; charset=utf-8');
-        res.end('<h1> 404 </h1>');
+        case 'POST':
+
+            
     }
+
+
+
 }
 
 const server = http.createServer(processRequest);
 
-aviablePort(lookingPort).then(port => {
-    server.listen(port, () => {
-        console.log(`Server is listening on http://localhost:${port}` );
-    });
-})
+server.listen(PORT, () => {
+    console.log(`Server is listening on http://localhost:${PORT}` );
+});
+

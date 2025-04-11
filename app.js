@@ -4,7 +4,7 @@ import { readFileSync } from 'node:fs';
 const PORT = process.env.PORT ?? 3000;
 
 // imports JSONs
-const cha1 = JSON.parse(readFileSync('./src/jsons/characters/1.JSON', 'utf-8'));
+const cha1 = JSON.parse(readFileSync('./src/jsons/characters/1.json', 'utf-8'));
 
 const processRequest = (req, res) => {
     const {method, url} = req;
@@ -21,7 +21,6 @@ const processRequest = (req, res) => {
                     res.setHeader('Content-Type', 'application/json; charset=utf-8');
                     res.end(JSON.stringify(cha1));
                     break;
-                
                 default:
                     res.statusCode = 404;
                     res.setHeader('Content-Type', 'text/html; charset=utf-8');
@@ -31,20 +30,28 @@ const processRequest = (req, res) => {
         
         case 'POST': 
             switch(url) {
-                case '/character/':
-                    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+                case '/character':
                     let body = '';
-                }
+                    
+                    req.on('data', chunk => {
+                        body += chunk.toString();
+                    });
+                    req.on('end', () => {
+                        const data = JSON.parse(body);
+
+                        res.writeHead(201, {'Content-Type': 'application/json'});
+                        res.end(JSON.stringify(data));
+                    });
+                    break; 
+
                 default:
                     res.statusCode = 404;
                     res.setHeader('Content-Type', 'text/html; charset=utf-8');
-                    res.end('<h1> 404 not found </h1>');
-
-            
+                    res.end('<h1> 404 post not found </h1>');
+                    break; 
+            }
+            break; 
     }
-
-
-
 }
 
 const server = http.createServer(processRequest);

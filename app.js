@@ -1,62 +1,42 @@
-import http from 'node:http';
+import express from 'express';
 import { readFileSync } from 'node:fs';
 
+const app = express();
 const PORT = process.env.PORT ?? 3000;
 
 // imports JSONs
 const cha1 = JSON.parse(readFileSync('./src/jsons/characters/1.json', 'utf-8'));
 
-const processRequest = (req, res) => {
-    const {method, url} = req;
 
-    switch (method) {
-        case 'GET':
+app.disable('x-powered-by'); // desactiva el header x-powered-by
 
-            switch(url){
-                case '/':
-                    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-                    res.end('<h1> Bienvenido </h1> <a href="/character/1">personaje 1</a>');
-                    break;
-                case '/character/1':
-                    res.setHeader('Content-Type', 'application/json; charset=utf-8');
-                    res.end(JSON.stringify(cha1));
-                    break;
-                default:
-                    res.statusCode = 404;
-                    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-                    res.end('<h1> 404 </h1>');
-            }
-            break;
-        
-        case 'POST': 
-            switch(url) {
-                case '/character':
-                    let body = '';
-                    
-                    req.on('data', chunk => {
-                        body += chunk.toString();
-                    });
-                    req.on('end', () => {
-                        const data = JSON.parse(body);
+app.get('/', (req, res) => {
+    res.status(200).send('<h1> Con express </h1>');//express automaticamente detecta el content type
+})
 
-                        res.writeHead(201, {'Content-Type': 'application/json'});
-                        res.end(JSON.stringify(data));
-                    });
-                    break; 
-
-                default:
-                    res.statusCode = 404;
-                    res.setHeader('Content-Type', 'text/html; charset=utf-8');
-                    res.end('<h1> 404 post not found </h1>');
-                    break; 
-            }
-            break; 
-    }
-}
-
-const server = http.createServer(processRequest);
-
-server.listen(PORT, () => {
-    console.log(`Server is listening on http://localhost:${PORT}` );
+app.get('/character/1', (req, res) => {
+    res.status(200).json(cha1);
 });
 
+
+app.post('/character', (req, res) => {
+    let body = '';
+
+    req.on('data', chunk => {
+        body += chunk.toString();
+    });
+
+    req.on('end', () => {
+        const data = JSON.parse(body);
+        //base de datos
+        res.status(201).json(data);
+    }); 
+});
+
+app.use((req, res) => {
+    res.status(404).send('<h1> 404 no encontrado</h1>');
+});
+
+app.listen(PORT, () => {
+    console.log(`Server running http://localhost:${PORT}`);
+});
